@@ -1,13 +1,17 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 func main() {
-	fmt.Println("Hello, world!")
+	r := NewRepository("/Users/adammitha/Pictures/Screenshots")
+	err := r.AddImage("https://image.freepik.com/free-vector/shining-circle-purple-lighting-isolated-dark-background_1441-2396.jpg")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 // Init initializes the command line interface to create or interact with an image repository
