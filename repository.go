@@ -19,6 +19,8 @@ var imageExtensions = extensions{
 	"png",
 	"tiff",
 	"gif",
+	"heic",
+	"svg",
 }
 
 // Repository is a repository of images located on the local machine
@@ -57,8 +59,8 @@ func isImage(path string) bool {
 }
 
 // contains returns true if s is an element of l
-func (l extensions) contains(s string) bool {
-	for _, e := range l {
+func (ext extensions) contains(s string) bool {
+	for _, e := range ext {
 		if e == s {
 			return true
 		}
