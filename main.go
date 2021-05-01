@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	r := NewRepository("/Users/adammitha/Pictures/Screenshots")
+	r := NewRepository("/Users/adammitha/Downloads")
 	err := r.AddImage("https://image.freepik.com/free-vector/shining-circle-purple-lighting-isolated-dark-background_1441-2396.jpg")
 	if err != nil {
 		log.Fatal(err)

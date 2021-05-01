@@ -21,3 +21,11 @@ func TestIsImage(t *testing.T) {
 	is.True(isImage("/dir1/dir2/image.png"))
 	is.True(!isImage("/dir1/file.pdf"))
 }
+
+func TestGetFilename(t *testing.T) {
+	is := is.New(t)
+
+	filename, err := getFilename("http://test.com/test.jpg")
+	is.Equal(err, nil)
+	is.Equal(filename, "test.jpg")
+}

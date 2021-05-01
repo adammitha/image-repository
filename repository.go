@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/fs"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -71,6 +72,12 @@ func (r *Repository) AddImage(url string) error {
 		return fmt.Errorf("not a supported image type")
 	}
 
+	filename, err := getFilename(url)
+	if err != nil {
+		return fmt.Errorf("error parsing url: %w", err)
+	}
+	filename = filepath.Join(r.root, filename)
+
 	resp, err := http.Get(url)
 	if err != nil {
 		return fmt.Errorf("error fetching image: %w", err)
@@ -81,10 +88,20 @@ func (r *Repository) AddImage(url string) error {
 	if err != nil {
 		return fmt.Errorf("error reading image: %w", err)
 	}
-	err = os.WriteFile("/Users/adammitha/Downloads/test.jpeg", image, 0666)
+	err = os.WriteFile(filename, image, 0666)
 	if err != nil {
 		return fmt.Errorf("error saving file: %w", err)
 	}
 
 	return nil
+}
+
+// getFilename returns the name of the file at url
+func getFilename(path string) (string, error) {
+	parsedURL, err := url.Parse(path)
+	if err != nil {
+		return "", fmt.Errorf("error parsing url: %w", err)
+	}
+	_, filename := filepath.Split(parsedURL.Path)
+	return filename, nil
 }
