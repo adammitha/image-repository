@@ -9,6 +9,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
+
+	"github.com/charmbracelet/bubbles/textinput"
 )
 
 type extensions []string
@@ -23,17 +26,24 @@ var imageExtensions = extensions{
 	"svg",
 }
 
-// Repository is a repository of images located on the local machine
+// Repository is a repository of images located at root
 type Repository struct {
-	root string
-	fs   fs.FS
+	root      string
+	fs        fs.FS
+	textInput textinput.Model
 }
 
 // NewRepository initializes the application's state with an image repository located at the path `root`
 func NewRepository(root string) *Repository {
+	ti := textinput.NewModel()
+	ti.Placeholder = ". (Current directory)"
+	ti.Focus()
+	ti.CharLimit = 256
+	ti.Width = 30
 	return &Repository{
-		root: root,
-		fs:   os.DirFS(root),
+		root:      root,
+		fs:        os.DirFS(root),
+		textInput: ti,
 	}
 }
 
@@ -42,7 +52,6 @@ func (r *Repository) GetImages() []fs.DirEntry {
 	images := make([]fs.DirEntry, 0)
 
 	fs.WalkDir(r.fs, ".", func(path string, d fs.DirEntry, err error) error {
-		fmt.Println(path)
 		if isImage(path) {
 			images = append(images, d)
 		}
@@ -68,8 +77,35 @@ func (ext extensions) contains(s string) bool {
 	return false
 }
 
-// AddImage downloads the image at the provided url and adds it to the repository
-func (r *Repository) AddImage(url string) error {
+// AddImages consumes a slice of urls to images, retrieves each image and adds it to the repository
+func (r *Repository) AddImages(urls []string) []error {
+	var errors []error
+	errChan := make(chan error, len(urls))
+	var wg sync.WaitGroup
+	for _, url := range urls {
+		url := url
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			err := r.addImage(url)
+			errChan <- err
+		}()
+	}
+
+	wg.Wait()
+	close(errChan)
+
+	for err := range errChan {
+		if err != nil {
+			errors = append(errors, err)
+		}
+	}
+
+	return errors
+}
+
+// addImage downloads the image at the provided url and adds it to the repository
+func (r *Repository) addImage(url string) error {
 	if !isImage(url) {
 		return fmt.Errorf("not a supported image type")
 	}
@@ -92,7 +128,7 @@ func (r *Repository) AddImage(url string) error {
 	}
 	err = os.WriteFile(filename, image, 0666)
 	if err != nil {
-		return fmt.Errorf("error saving file: %w", err)
+		return fmt.Errorf("error saving image: %w", err)
 	}
 
 	return nil
