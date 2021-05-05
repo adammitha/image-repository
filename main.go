@@ -8,13 +8,8 @@ import (
 
 func main() {
 	r := NewRepository("/Users/adammitha/Downloads")
-	err := r.AddImage("https://image.freepik.com/free-vector/shining-circle-purple-lighting-isolated-dark-background_1441-2396.jpg")
-	if err != nil {
-		log.Fatal(err)
+	cli := tea.NewProgram(r)
+	if err := cli.Start(); err != nil {
+		log.Fatalf("Alas, there's been an error: %v", err)
 	}
-}
-
-// Init initializes the command line interface to create or interact with an image repository
-func (r Repository) Init() tea.Cmd {
-	return nil
 }
