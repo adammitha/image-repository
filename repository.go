@@ -10,8 +10,6 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-
-	"github.com/charmbracelet/bubbles/textinput"
 )
 
 type extensions []string
@@ -28,22 +26,15 @@ var imageExtensions = extensions{
 
 // Repository is a repository of images located at root
 type Repository struct {
-	root      string
-	fs        fs.FS
-	textInput textinput.Model
+	root string
+	fs   fs.FS
 }
 
 // NewRepository initializes the application's state with an image repository located at the path `root`
 func NewRepository(root string) *Repository {
-	ti := textinput.NewModel()
-	ti.Placeholder = ". (Current directory)"
-	ti.Focus()
-	ti.CharLimit = 256
-	ti.Width = 30
 	return &Repository{
-		root:      root,
-		fs:        os.DirFS(root),
-		textInput: ti,
+		root: root,
+		fs:   os.DirFS(root),
 	}
 }
 

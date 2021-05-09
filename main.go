@@ -1,15 +1,21 @@
 package main
 
 import (
+	"flag"
 	"log"
+)
 
-	tea "github.com/charmbracelet/bubbletea"
+var (
+	dir = flag.String("dir", ".", "Root directory of image repository.")
 )
 
 func main() {
-	r := NewRepository("/Users/adammitha/Downloads")
-	cli := tea.NewProgram(r)
-	if err := cli.Start(); err != nil {
-		log.Fatalf("Alas, there's been an error: %v", err)
+	flag.Parse()
+	urls := flag.Args()
+	log.Printf("Initializing an image repository with root: %s\n", *dir)
+	r := NewRepository(*dir)
+	errors := r.AddImages(urls)
+	for e := range errors {
+		log.Println(e)
 	}
 }
